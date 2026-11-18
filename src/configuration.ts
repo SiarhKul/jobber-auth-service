@@ -17,6 +17,7 @@ class Config {
   public ELASTIC_SEARCH_URL: string | undefined;
   public ELASTIC_APM_SERVER_URL: string | undefined;
   public ELASTIC_APM_SECRET_TOKEN: string | undefined;
+  public API_GATEWAY_URL: string | undefined;
 
   constructor() {
     this.ENABLE_APM = process.env.ENABLE_APM || '0';
@@ -33,6 +34,7 @@ class Config {
     this.ELASTIC_SEARCH_URL = process.env.ELASTIC_SEARCH_URL || '';
     this.ELASTIC_APM_SERVER_URL = process.env.ELASTIC_APM_SERVER_URL || '';
     this.ELASTIC_APM_SECRET_TOKEN = process.env.ELASTIC_APM_SECRET_TOKEN || '';
+    this.API_GATEWAY_URL = process.env.API_GATEWAY_URL || '';
   }
 }
 
