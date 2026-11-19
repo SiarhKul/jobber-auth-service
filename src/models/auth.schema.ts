@@ -3,12 +3,22 @@ import { sequelize } from '@auth/database';
 import { IAuthDocument } from '@SiarhKul/jobber-shared';
 import { compare, hash } from 'bcryptjs';
 
+const SALT_ROUND = 10;
+
 type AuthUserCreationAttributes = Optional<
   IAuthDocument,
   'id' | 'createdAt' | 'passwordResetToken' | 'passwordResetExpires'
 >;
 
-const AuthModel: ModelDefined<IAuthDocument, AuthUserCreationAttributes> = sequelize.define(
+interface AuthModelInstanceMethods extends Model {
+  prototype: {
+    comparePassword: (password: string, hashedPassword: string) => Promise<boolean>;
+    hashPassword: (password: string) => Promise<string>;
+  };
+}
+
+const AuthModel: ModelDefined<IAuthDocument, AuthUserCreationAttributes> &
+  AuthModelInstanceMethods = sequelize.define(
   'auths',
   {
     username: {
@@ -64,7 +74,7 @@ const AuthModel: ModelDefined<IAuthDocument, AuthUserCreationAttributes> = seque
       { unique: true, fields: ['username'] }
     ]
   }
-);
+) as ModelDefined<IAuthDocument, AuthUserCreationAttributes> & AuthModelInstanceMethods;
 
 AuthModel.addHook('beforeCreate', async (auth: Model) => {
   const hashedPassword = await hash(auth.dataValues.password as string, 10);
@@ -76,6 +86,10 @@ AuthModel.prototype.comparePassword = async function (
   hashedPassword: string
 ): Promise<boolean> {
   return compare(password, hashedPassword);
+};
+
+AuthModel.prototype.hashPassword = async function (password: string): Promise<string> {
+  return hash(password, SALT_ROUND);
 };
 
 AuthModel.sync({});
