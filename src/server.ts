@@ -10,10 +10,14 @@ import { config } from './configuration';
 import { checkConnection } from './elasticsearch';
 import http from 'http';
 import { appRoutes } from './routes';
+import { createConnection } from './queues/connection';
+import { Channel } from 'amqplib';
 
 const SERVER_PORT = 4002;
 
 const log: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'authenticationServer', 'debug');
+
+export let authChannel: Channel;
 
 export function start(app: Application): void {
   securityMiddleware(app);
@@ -22,6 +26,7 @@ export function start(app: Application): void {
   startElasticSearch();
   authErrorHandler(app);
   startServer(app);
+  startQueues();
 }
 
 function securityMiddleware(app: Application): void {
@@ -82,4 +87,8 @@ function startServer(app: Application): void {
   } catch (error) {
     log.log('error', 'AuthService startServer() method error:', error);
   }
+}
+
+async function startQueues() {
+  authChannel = (await createConnection()) as Channel;
 }
