@@ -9,6 +9,8 @@ import {
   lowerCase,
   type IAuthBuyerMessageDetails
 } from '@SiarhKul/jobber-shared';
+import { sign } from 'jsonwebtoken';
+import { config } from '@auth/configuration';
 
 export async function createAuthUser(
   data: AuthUserAttributes
@@ -121,4 +123,58 @@ export async function getAuthUserByPasswordToken(
   }
 
   return user.dataValues;
+}
+
+export async function updateVerificationField(
+  authId: number,
+  emailVerified: number,
+  emailVerificationToken: string
+): Promise<void> {
+  await AuthModel.update(
+    {
+      emailVerified,
+      emailVerificationToken
+    },
+    {
+      where: { id: authId }
+    }
+  );
+}
+
+export async function updatePasswordToken(
+  authId: number,
+  token: string,
+  tokenExpiration: Date
+): Promise<void> {
+  await AuthModel.update(
+    {
+      passwordResetToken: token,
+      passwordResetExpires: tokenExpiration
+    },
+    {
+      where: { id: authId }
+    }
+  );
+}
+
+export async function updatePassword(authId: number, password: string): Promise<void> {
+  await AuthModel.update(
+    {
+      password,
+      passwordResetToken: '',
+      passwordResetExpires: new Date()
+    },
+    { where: { id: authId } }
+  );
+}
+
+export function signToken(id: number, email: string, username: string): string {
+  return sign(
+    {
+      id,
+      email,
+      username
+    },
+    config.JWT_TOKEN!
+  );
 }
