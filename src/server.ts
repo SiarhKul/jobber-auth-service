@@ -35,7 +35,7 @@ function securityMiddleware(app: Application): void {
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
     })
   );
-  app.use((req: Request, res: Response, next: NextFunction) => {
+  app.use((req: Request, _: Response, next: NextFunction) => {
     if (req.headers.authorization) {
       const token = req.headers.authorization.split(' ')[1];
       const payload: IAuthPayload = verify(token, config.JWT_TOKEN!) as IAuthPayload;
@@ -62,7 +62,7 @@ function startElasticSearch(): void {
 }
 
 function authErrorHandler(app: Application): void {
-  app.use((error: IErrorResponse, req: Request, res: Response, next: NextFunction) => {
+  app.use((error: IErrorResponse, _: Request, res: Response, next: NextFunction) => {
     log.log('error', `AuthenticationService ${error.comingFrom}:`, error);
     if (error instanceof CustomError) {
       res.status(error.statusCode).json(error.serializeErrors());
