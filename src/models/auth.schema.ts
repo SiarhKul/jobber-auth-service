@@ -1,24 +1,28 @@
-import { DataTypes, Model, ModelDefined, Optional } from 'sequelize';
+import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '@auth/database';
 import { IAuthDocument } from '@SiarhKul/jobber-shared';
 import { compare, hash } from 'bcryptjs';
 
 const SALT_ROUND = 10;
 
-type AuthUserCreationAttributes = Optional<
-  IAuthDocument,
-  'id' | 'createdAt' | 'passwordResetToken' | 'passwordResetExpires'
->;
+type RequiredAuthUserFields =
+  | 'username'
+  | 'password'
+  | 'profilePublicId'
+  | 'email'
+  | 'country'
+  | 'profilePicture'
+  | 'emailVerificationToken';
 
-interface AuthModelInstanceMethods extends Model {
-  prototype: {
-    comparePassword: (password: string, hashedPassword: string) => Promise<boolean>;
-    hashPassword: (password: string) => Promise<string>;
-  };
+export type AuthUserAttributes = Omit<IAuthDocument, 'comparePassword' | 'hashPassword'> &
+  Required<Pick<IAuthDocument, RequiredAuthUserFields>>;
+
+interface AuthModelInstance extends Model<AuthUserAttributes, AuthUserAttributes> {
+  comparePassword(password: string, hashedPassword: string): Promise<boolean>;
+  hashPassword(password: string): Promise<string>;
 }
 
-const AuthModel: ModelDefined<IAuthDocument, AuthUserCreationAttributes> &
-  AuthModelInstanceMethods = sequelize.define(
+const AuthModel = sequelize.define<AuthModelInstance>(
   'auths',
   {
     username: {
@@ -74,23 +78,21 @@ const AuthModel: ModelDefined<IAuthDocument, AuthUserCreationAttributes> &
       { unique: true, fields: ['username'] }
     ]
   }
-) as ModelDefined<IAuthDocument, AuthUserCreationAttributes> & AuthModelInstanceMethods;
+);
 
-AuthModel.addHook('beforeCreate', async (auth: Model) => {
-  const hashedPassword = await hash(auth.dataValues.password as string, 10);
-  auth.dataValues.password = hashedPassword;
+AuthModel.addHook('beforeCreate', async (auth) => {
+  const hashedPassword = await hash(auth.getDataValue('password'), SALT_ROUND);
+  auth.setDataValue('password', hashedPassword);
 });
 
-AuthModel.prototype.comparePassword = async function (
-  password: string,
-  hashedPassword: string
-): Promise<boolean> {
-  return compare(password, hashedPassword);
-};
-
-AuthModel.prototype.hashPassword = async function (password: string): Promise<string> {
-  return hash(password, SALT_ROUND);
-};
+Object.assign(AuthModel.prototype, {
+  async comparePassword(password, hashedPassword) {
+    return compare(password, hashedPassword);
+  },
+  async hashPassword(password) {
+    return hash(password, SALT_ROUND);
+  }
+} satisfies Pick<AuthModelInstance, 'comparePassword' | 'hashPassword'>);
 
 AuthModel.sync({});
 
