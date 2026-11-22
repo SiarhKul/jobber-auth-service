@@ -75,7 +75,9 @@ const AuthModel = sequelize.define<AuthModelInstance>(
   {
     indexes: [
       { unique: true, fields: ['email'] },
-      { unique: true, fields: ['username'] }
+      { unique: true, fields: ['username'] },
+      { unique: true, fields: ['emailVerificationToken'] },
+      { unique: true, fields: ['passwordResetToken'] }
     ]
   }
 );
