@@ -12,7 +12,7 @@ import {
 import { sign } from 'jsonwebtoken';
 import { config } from '@auth/configuration';
 
-export async function createAuthUser(
+export async function createdAndPublishAuthUser(
   data: AuthUserAttributes
 ): Promise<Omit<AuthUserAttributes, 'password'>> {
   const { dataValues } = await AuthModel.create(data);
