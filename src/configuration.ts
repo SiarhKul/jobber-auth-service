@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-
+import cloudinary from 'cloudinary';
 dotenv.config({});
 
 class Config {
@@ -35,6 +35,14 @@ class Config {
     this.ELASTIC_APM_SERVER_URL = process.env.ELASTIC_APM_SERVER_URL || '';
     this.ELASTIC_APM_SECRET_TOKEN = process.env.ELASTIC_APM_SECRET_TOKEN || '';
     this.API_GATEWAY_URL = process.env.API_GATEWAY_URL || '';
+  }
+
+  public cloudinaryConfig(): void {
+    cloudinary.v2.config({
+      cloud_name: this.CLOUD_NAME,
+      api_key: this.CLOUD_API_KEY,
+      api_secret: this.CLOUD_API_SECRET
+    });
   }
 }
 

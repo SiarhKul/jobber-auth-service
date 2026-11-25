@@ -8,7 +8,6 @@ import {
   BadRequestError,
   firstLetterUppercase,
   IEmailMessageDetails,
-  IAuthDocument,
   lowerCase,
   uploads
 } from '@SiarhKul/jobber-shared';
@@ -32,9 +31,9 @@ export async function create(req: Request, res: Response): Promise<void> {
 
   const { username, email, password, country, profilePicture } = req.body;
 
-  const checkIfUserExist: IAuthDocument = await getUserByUsernameOrEmail(username, email);
+  const existingUser = await getUserByUsernameOrEmail(username, email);
 
-  if (checkIfUserExist) {
+  if (existingUser) {
     throw new BadRequestError(
       'Invalid credentials. Email or Username',
       'SignUp create() method error'
@@ -42,9 +41,9 @@ export async function create(req: Request, res: Response): Promise<void> {
   }
 
   const profilePublicId = uuidV4();
-  const uploadResult = await uploads(profilePicture, `${profilePublicId}`, true, true);
+  const uploadResult = await uploads(profilePicture, profilePublicId, true, true);
 
-  if (!uploadResult.public_id) {
+  if (!uploadResult?.public_id || !uploadResult.secure_url) {
     throw new BadRequestError('File upload error. Try again', 'SignUp create() method error');
   }
 
@@ -57,11 +56,11 @@ export async function create(req: Request, res: Response): Promise<void> {
     profilePublicId,
     password,
     country,
-    profilePicture: uploadResult?.secure_url,
+    profilePicture: uploadResult.secure_url,
     emailVerificationToken: randomCharacters
   };
 
-  const result: IAuthDocument = await createdAndPublishAuthUser(authData);
+  const result = await createdAndPublishAuthUser(authData);
 
   const verificationLink = `${config.CLIENT_URL}/confirm_email?v_token=${authData.emailVerificationToken}`;
 

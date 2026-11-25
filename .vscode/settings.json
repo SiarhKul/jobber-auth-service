@@ -1,3 +1,20 @@
 {
-  "editor.fontSize": 14
+  "editor.fontSize": 14,
+  "window.titleBarStyle": "custom",
+  "workbench.colorCustomizations": {
+    "activityBar.background": "#8B1E2D",
+    "activityBar.foreground": "#FFFFFF",
+    "activityBar.inactiveForeground": "#F5D8DC",
+    "modernActivityBar.background": "#8B1E2D",
+    "modernActivityBar.inactiveBackground": "#8B1E2D",
+    "sideBar.background": "#8B1E2D",
+    "sideBar.foreground": "#FFFFFF",
+    "sideBarTitle.foreground": "#FFFFFF",
+    "sideBarSectionHeader.background": "#701724",
+    "sideBarSectionHeader.foreground": "#FFFFFF",
+    "titleBar.activeBackground": "#A52235",
+    "titleBar.activeForeground": "#FFFFFF",
+    "titleBar.inactiveBackground": "#701724",
+    "titleBar.inactiveForeground": "#F5D8DC"
+  }
 }
