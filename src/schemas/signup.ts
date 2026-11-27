@@ -24,10 +24,14 @@ export const signupSchema: ObjectSchema = Joi.object().keys({
     'string.email': 'Invalid email',
     'string.empty': 'Email is a required field'
   }),
-  profilePicture: Joi.string().min(4).max(12).required().messages({
-    'string.base': 'Profile picture must be of type string',
-    'string.min': 'Invalid profile picture',
-    'string.max': 'Invalid profile picture',
-    'string.empty': 'Profile picture is a required field'
-  })
+  profilePicture: Joi.string()
+    .dataUri()
+    .pattern(/^data:image\/[\w.+-]+;base64,/i)
+    .required()
+    .messages({
+      'string.base': 'Profile picture must be of type string',
+      'string.dataUri': 'Invalid profile picture',
+      'string.pattern.base': 'Invalid profile picture',
+      'string.empty': 'Profile picture is a required field'
+    })
 });

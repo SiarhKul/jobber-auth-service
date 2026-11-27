@@ -1,4 +1,6 @@
 import express, { Express } from 'express';
+
+import 'express-async-errors';
 import { start } from './server';
 import { databaseConnection } from './database';
 import { config } from './configuration';

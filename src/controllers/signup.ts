@@ -8,9 +8,9 @@ import {
   BadRequestError,
   firstLetterUppercase,
   IEmailMessageDetails,
-  lowerCase,
-  uploads
+  lowerCase
 } from '@SiarhKul/jobber-shared';
+import cloudinary from 'cloudinary';
 import { Request, Response } from 'express';
 
 import crypto from 'crypto';
@@ -41,7 +41,14 @@ export async function create(req: Request, res: Response): Promise<void> {
   }
 
   const profilePublicId = uuidV4();
-  const uploadResult = await uploads(profilePicture, profilePublicId, true, true);
+  const uploadResult = await cloudinary.v2.uploader
+    .upload(profilePicture, {
+      public_id: profilePublicId,
+      overwrite: true,
+      invalidate: true,
+      resource_type: 'image'
+    })
+    .catch(() => undefined);
 
   if (!uploadResult?.public_id || !uploadResult.secure_url) {
     throw new BadRequestError('File upload error. Try again', 'SignUp create() method error');
